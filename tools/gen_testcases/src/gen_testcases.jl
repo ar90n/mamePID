@@ -99,7 +99,7 @@ function dump_as_c_code(name::String, arch::Architecture, order_of_lag::Int, par
 namespace testcases {
 struct $name
 {
-    static constexpr const char const* arch{"$(str(arch))"};
+    static constexpr const char* arch{"$(str(arch))"};
     static constexpr int order_of_lag{$order_of_lag};
     static constexpr double kp{$(param.kp)};
     static constexpr double ki{$(param.ki)};
