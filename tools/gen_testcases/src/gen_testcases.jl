@@ -52,8 +52,6 @@ end
 
 @with_kw struct Result
     y::Vector{Float64}
-    r::Vector{Float64}
-    Td::Vector{Float64}
 end
 
 function pid_tf(param::Param)::TransferFunction
@@ -89,10 +87,10 @@ end
 function simulate(system::System, input::Input)::Result
     T = total_tf(system, input.sp)
     t = input.sp * collect(0:input.n-1)
-    u(x, t) = input.g * (t > 0)
 
-    y, t, _, r = lsim(T, u, t)
-    return Result(round.(vec(y), digits=6), round.(vec(r), digits=6), t)
+    u(x,t) = input.g
+    y, _, _ = lsim(c2d(T, input.sp), u, t)
+    return Result(round.(vec(y), digits=6))
 end
 
 function dump_as_c_code(name::String, arch::Architecture, order_of_lag::Int, param::Param, input::Input, result::Result)
@@ -108,9 +106,6 @@ namespace testcases {
         constexpr double g{$(input.g)};
         constexpr double sp{$(input.sp)};
 
-        constexpr std::array<double, $(length(result.r))> input{
-            $(join(map(string, result.r), ","))
-        };
         constexpr std::array<double, $(length(result.y))> output{
             $(join(map(string, result.y), ","))
         };
