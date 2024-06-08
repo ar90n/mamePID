@@ -32,7 +32,7 @@ gen: $(TEST_VECTOR_DIR)/simple_p.hpp $(TEST_VECTOR_DIR)/simple_i.hpp $(TEST_VECT
 	@echo "All test vectors generated"
 
 # Build the test program
-$(TEST_BIN): $(TEST_SRC) test_vectors
+$(TEST_BIN): $(TEST_SRC) gen
 	@echo "Building test program"
 	$(CXX) $(CXXFLAGS) -o $(TEST_BIN) $(TEST_SRC)
 
