@@ -1,0 +1,9 @@
+name = "gen_testcases"
+uuid = "0d99187a-2abd-4f85-9a25-eedf944679ee"
+authors = ["Masahiro Wada <argon.argon.argon@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+ArgParse = "c7e460c6-2fb9-53a9-8c5b-16f535851c63"
+ControlSystems = "a6e380b2-a6ca-5380-bf3e-84a91bcd477e"
+DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
