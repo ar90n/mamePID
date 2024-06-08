@@ -442,9 +442,9 @@ UTEST_EXTERN struct utest_state_s utest_state;
 
 #include <type_traits>
 
-template <typename T, bool is_enum = std::is_enum<T>::value>
+template <typename TestCase, bool is_enum = std::is_enum<TestCase>::value>
 struct utest_type_deducer final {
-  static void _(const T t);
+  static void _(const TestCase t);
 };
 
 template <> struct utest_type_deducer<signed char, false> {
@@ -516,18 +516,18 @@ template <> struct utest_type_deducer<bool, false> {
   static void _(const bool i) { UTEST_PRINTF(i ? "true" : "false"); }
 };
 
-template <typename T> struct utest_type_deducer<const T *, false> {
-  static void _(const T *t) {
-    UTEST_PRINTF("%p", static_cast<void *>(const_cast<T *>(t)));
+template <typename TestCase> struct utest_type_deducer<const TestCase *, false> {
+  static void _(const TestCase *t) {
+    UTEST_PRINTF("%p", static_cast<void *>(const_cast<TestCase *>(t)));
   }
 };
 
-template <typename T> struct utest_type_deducer<T *, false> {
-  static void _(T *t) { UTEST_PRINTF("%p", static_cast<void *>(t)); }
+template <typename TestCase> struct utest_type_deducer<TestCase *, false> {
+  static void _(TestCase *t) { UTEST_PRINTF("%p", static_cast<void *>(t)); }
 };
 
-template <typename T> struct utest_type_deducer<T, true> {
-  static void _(const T t) {
+template <typename TestCase> struct utest_type_deducer<TestCase, true> {
+  static void _(const TestCase t) {
     UTEST_PRINTF("%llu", static_cast<unsigned long long>(t));
   }
 };
@@ -538,9 +538,9 @@ template <> struct utest_type_deducer<std::nullptr_t, false> {
   }
 };
 
-template <typename T>
-UTEST_WEAK UTEST_OVERLOADABLE void utest_type_printer(const T t) {
-  utest_type_deducer<T>::_(t);
+template <typename TestCase>
+UTEST_WEAK UTEST_OVERLOADABLE void utest_type_printer(const TestCase t) {
+  utest_type_deducer<TestCase>::_(t);
 }
 
 #ifdef __clang__

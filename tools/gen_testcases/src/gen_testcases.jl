@@ -97,19 +97,20 @@ function dump_as_c_code(name::String, arch::Architecture, order_of_lag::Int, par
     println("""#include<array>
 
 namespace testcases {
-    namespace $name {
-        constexpr const char* arch{"$(str(arch))"};
-        constexpr int order_of_lag{$order_of_lag};
-        constexpr double kp{$(param.kp)};
-        constexpr double ki{$(param.ki)};
-        constexpr double kd{$(param.kd)};
-        constexpr double g{$(input.g)};
-        constexpr double sp{$(input.sp)};
+struct $name
+{
+    static constexpr const char const* arch{"$(str(arch))"};
+    static constexpr int order_of_lag{$order_of_lag};
+    static constexpr double kp{$(param.kp)};
+    static constexpr double ki{$(param.ki)};
+    static constexpr double kd{$(param.kd)};
+    static constexpr double g{$(input.g)};
+    static constexpr double sp{$(input.sp)};
 
-        constexpr std::array<double, $(length(result.y))> output{
-            $(join(map(string, result.y), ","))
-        };
-    }
+    static constexpr std::array<double, $(length(result.y))> output{
+        $(join(map(string, result.y), ","))
+    };
+};
 }""")
 end
 
