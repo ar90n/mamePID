@@ -33,3 +33,4 @@
 
 # Artifacts
 test/testcases/*.hpp
+test/main
