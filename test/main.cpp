@@ -57,7 +57,7 @@ template<TestCase TC, typename T>
 auto
 run_test(T min_value, T max_value)
 {
-  mamePID::PID<T> pid(TC::kp, TC::ki, TC::kd, TC::sp, min_value, max_value);
+  mamePID::PID<T> pid(TC::kp, TC::ki, TC::kd, TC::sp, min_value, max_value, TC::g);
 
   T                   acc{ 0 };
   std::function<T(T)> identity        = [](T v) -> T { return v; };

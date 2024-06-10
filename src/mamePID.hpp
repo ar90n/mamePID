@@ -5,36 +5,39 @@ template<typename T>
 class PID
 {
 public:
-  PID(T kp, T ki, T kd, T dt, T min, T max)
+  PID(T kp, T ki, T kd, T dt, T min, T max, T pre_pv = 0, T integral = 0)
     : kp(kp)
     , ki(ki)
     , kd(kd)
     , dt(dt)
     , min(min)
     , max(max)
-    , pre_error(0)
-    , integral(0)
+    , pre_pv(pre_pv)
+    , integral(integral)
   {
   }
 
   T calculate(T setpoint, T pv)
   {
-    T error      = setpoint - pv;
-    T derivative = (error - pre_error) / dt;
+    const T error      = setpoint - pv;
+    const T derivative = (pv - pre_pv) / dt;
 
-    T output = kp * error + ki * integral + kd * derivative;
-    if (output > max)
-      output = max;
-    else if (output < min)
-      output = min;
+    T output = kp * error + ki * integral - kd * derivative;
+    output   = std::clamp(output, min, max);
 
-    integral  += error * dt;
-    pre_error  = error;
+    integral += error * dt;
+    pre_pv    = pv;
     return output;
   }
 
 private:
-  T kp, ki, kd, dt, min, max;
-  T pre_error, integral;
+  const T kp;
+  const T ki;
+  const T kd;
+  const T dt;
+  const T min;
+  const T max;
+  T       pre_pv;
+  T       integral;
 };
 } // namespace mamePID
