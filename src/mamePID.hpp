@@ -7,8 +7,8 @@ class PID
 public:
   PID(T kp, T ki, T kd, T dt, T min, T max, T pre_pv = 0, T integral = 0)
     : kp(kp)
-    , ki(ki)
-    , kd(kd)
+    , ki(ki * dt)
+    , kd(kd / dt)
     , dt(dt)
     , min(min)
     , max(max)
@@ -20,12 +20,12 @@ public:
   T calculate(T setpoint, T pv)
   {
     const T error      = setpoint - pv;
-    const T derivative = (pv - pre_pv) / dt;
+    const T derivative = pv - pre_pv;
 
     T output = kp * error + ki * integral - kd * derivative;
     output   = std::clamp(output, min, max);
 
-    integral += error * dt;
+    integral += error;
     pre_pv    = pv;
     return output;
   }
