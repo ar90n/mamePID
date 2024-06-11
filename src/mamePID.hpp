@@ -97,6 +97,23 @@ private:
 };
 
 template<typename T>
+class PrecedingProportional
+{
+public:
+  using value_type = T;
+
+  PrecedingProportional(T kp, T)
+    : kp(kp)
+  {
+  }
+
+  T calculate(T, T pv) { return -kp * pv; }
+
+private:
+  const T kp;
+};
+
+template<typename T>
 class PrecedingDerivative
 {
 public:
@@ -126,13 +143,7 @@ class PID
 public:
   using value_type = T;
 
-  PID(
-    ProportionalT proportional,
-    IntegralT     integral,
-    DerivativeT   derivative,
-    T             min = std::numeric_limits<T>::min,
-    T             max = std::numeric_limits<T>::max
-  )
+  PID(ProportionalT proportional, IntegralT integral, DerivativeT derivative, T min, T max)
     : proportional(proportional)
     , integral(integral)
     , derivative(derivative)
@@ -173,4 +184,50 @@ private:
   const T       min;
   const T       max;
 };
+
+template<typename T>
+auto
+pi(T kp, T ki, T sp, T min = std::numeric_limits<T>::min, T max = std::numeric_limits<T>::max)
+{
+  return PID<T, Proportional<T>, Integral<T>, Zero<T>>(
+    Proportional<T>(kp, sp), Integral<T>(ki, sp), Zero<T>(), min, max
+  );
+}
+
+template<typename T>
+auto
+pd(T kp, T kd, T sp, T min = std::numeric_limits<T>::min, T max = std::numeric_limits<T>::max)
+{
+  return PID<T, Proportional<T>, Zero<T>, Derivative<T>>(
+    Proportional<T>(kp, sp), Zero<T>(), Derivative<T>(kd, sp), min, max
+  );
+}
+
+template<typename T>
+auto
+pid(T kp, T ki, T kd, T sp, T min = std::numeric_limits<T>::min, T max = std::numeric_limits<T>::max)
+{
+  return PID<T, Proportional<T>, Integral<T>, Derivative<T>>(
+    Proportional<T>(kp, sp), Integral<T>(ki, sp), Derivative<T>(kd, sp), min, max
+  );
+}
+
+template<typename T>
+auto
+pi_d(T kp, T ki, T kd, T sp, T min = std::numeric_limits<T>::min, T max = std::numeric_limits<T>::max)
+{
+  return PID<T, Proportional<T>, Integral<T>, PrecedingDerivative<T>>(
+    Proportional<T>(kp, sp), Integral<T>(ki, sp), PrecedingDerivative<T>(kd, sp), min, max
+  );
+}
+
+template<typename T>
+auto
+i_pd(T kp, T ki, T kd, T sp, T min = std::numeric_limits<T>::min, T max = std::numeric_limits<T>::max)
+{
+  return PID<T, Proportional<T>, Integral<T>, PrecedingDerivative<T>>(
+    PrecedingDerivative<T>(kp, sp), Integral<T>(ki, sp), PrecedingDerivative<T>(kd, sp), min, max
+  );
+}
+
 } // namespace mamePID
