@@ -60,8 +60,8 @@ public:
   T calculate(T setpoint, T pv)
   {
     const T error  = setpoint - pv;
-    const T ret    = ki * integral;
-    integral      += error;
+    const T ret    = integral;
+    integral      += ki * error;
     return ret;
   }
 
