@@ -27,17 +27,17 @@
   {                                                                                                          \
     using testcase = testcases::testcase;                                                                    \
                                                                                                              \
-    const auto output = run_test<testcase, T>((min_v), (max_v));                                             \
+    const auto output = run_test<T, testcase>((min_v), (max_v));                                             \
     ASSERT_ARRNEAR_MSG(testcase::output, output, 1e-3);                                                      \
   }
 
-template<typename T>
+template<typename T, typename U>
 concept TestCase = requires(T t) {
-  { t.kp } -> std::convertible_to<double>;
-  { t.ki } -> std::convertible_to<double>;
-  { t.kd } -> std::convertible_to<double>;
-  { t.g } -> std::convertible_to<double>;
-  { t.sp } -> std::convertible_to<double>;
+  { t.kp } -> std::convertible_to<U>;
+  { t.ki } -> std::convertible_to<U>;
+  { t.kd } -> std::convertible_to<U>;
+  { t.g } -> std::convertible_to<U>;
+  { t.sp } -> std::convertible_to<U>;
   { t.order_of_lag } -> std::convertible_to<int>;
   { t.arch } -> std::convertible_to<const char*>;
   { t.output } -> std::ranges::range;
@@ -53,11 +53,17 @@ get_with_default(const Range& arr, size_t i, std::ranges::range_value_t<Range> d
   return arr[i];
 }
 
-template<TestCase TC, typename T>
+template<typename T, TestCase<T> TC>
 auto
 run_test(T min_value, T max_value)
 {
-  mamePID::PID<T> pid(TC::kp, TC::ki, TC::kd, TC::sp, min_value, max_value, TC::g);
+  mamePID::PID<T, mamePID::P<T>, mamePID::I<T>, mamePID::D<T>> pid(
+    mamePID::P<T>(TC::kp, TC::sp),
+    mamePID::I<T>(TC::ki, TC::sp),
+    mamePID::D<T>(TC::kd, TC::sp, TC::g),
+    min_value,
+    max_value
+  );
 
   T                   acc{ 0 };
   std::function<T(T)> identity        = [](T v) -> T { return v; };
