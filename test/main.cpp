@@ -57,10 +57,10 @@ template<typename T, TestCase<T> TC>
 auto
 run_test(T min_value, T max_value)
 {
-  mamePID::PID<T, mamePID::P<T>, mamePID::I<T>, mamePID::D<T>> pid(
-    mamePID::P<T>(TC::kp, TC::sp),
-    mamePID::I<T>(TC::ki, TC::sp),
-    mamePID::D<T>(TC::kd, TC::sp, TC::g),
+  mamePID::PID<T, mamePID::Proportional<T>, mamePID::Integral<T>, mamePID::Derivative<T>> pid(
+    mamePID::Proportional<T>(TC::kp, TC::sp),
+    mamePID::Integral<T>(TC::ki, TC::sp),
+    mamePID::Derivative<T>(TC::kd, TC::sp),
     min_value,
     max_value
   );

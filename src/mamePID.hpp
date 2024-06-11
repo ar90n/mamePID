@@ -14,12 +14,24 @@ concept CoeffMutable = requires(T t) {
 };
 
 template<typename T>
-class P
+class Zero
 {
 public:
   using value_type = T;
 
-  P(T kp, T dt)
+  Zero() {}
+
+  T    calculate(T, T) { return 0.0; }
+  void set(T) {}
+};
+
+template<typename T>
+class Proportional
+{
+public:
+  using value_type = T;
+
+  Proportional(T kp, T)
     : kp(kp)
   {
   }
@@ -35,11 +47,11 @@ private:
 };
 
 template<typename T>
-class I
+class Integral
 {
 public:
   using value_type = T;
-  I(T ki, T dt)
+  Integral(T ki, T dt)
     : ki(ki * dt)
     , integral(0)
   {
@@ -59,17 +71,43 @@ private:
 };
 
 template<typename T>
-class D
+class Derivative
 {
 public:
   using value_type = T;
-  D(T kd, T dt, T pre_pv = 0)
+
+  Derivative(T kd, T dt)
     : kd(kd / dt)
-    , pre_pv(pre_pv)
+    , pre_error(0)
   {
   }
 
   T calculate(T setpoint, T pv)
+  {
+    const T error      = setpoint - pv;
+    const T derivative = error - pre_error;
+    const T ret        = kd * derivative;
+    pre_error          = error;
+    return ret;
+  }
+
+private:
+  const T kd;
+  T       pre_error;
+};
+
+template<typename T>
+class PrecedingDerivative
+{
+public:
+  using value_type = T;
+  PrecedingDerivative(T kd, T dt)
+    : kd(kd / dt)
+    , pre_pv(0)
+  {
+  }
+
+  T calculate(T, T pv)
   {
     const T derivative = pv - pre_pv;
     const T ret        = -kd * derivative;
@@ -82,16 +120,22 @@ private:
   T       pre_pv;
 };
 
-template<typename T, Component<T> PT, Component<T> IT, Component<T> DT>
+template<typename T, Component<T> ProportionalT, Component<T> IntegralT, Component<T> DerivativeT>
 class PID
 {
 public:
   using value_type = T;
 
-  PID(PT p, IT i, DT d, T min = std::numeric_limits<T>::min, T max = std::numeric_limits<T>::max)
-    : p(p)
-    , i(i)
-    , d(d)
+  PID(
+    ProportionalT proportional,
+    IntegralT     integral,
+    DerivativeT   derivative,
+    T             min = std::numeric_limits<T>::min,
+    T             max = std::numeric_limits<T>::max
+  )
+    : proportional(proportional)
+    , integral(integral)
+    , derivative(derivative)
     , min(min)
     , max(max)
   {
@@ -99,33 +143,34 @@ public:
 
   T calculate(T setpoint, T pv)
   {
-    T output = p.calculate(setpoint, pv) + i.calculate(setpoint, pv) + d.calculate(setpoint, pv);
+    T output = proportional.calculate(setpoint, pv) + integral.calculate(setpoint, pv) +
+               derivative.calculate(setpoint, pv);
     return std::clamp(output, min, max);
   }
 
   void setKp(T kp)
-    requires CoeffMutable<PT>
+    requires CoeffMutable<ProportionalT>
   {
-    p.set(kp);
+    proportional.set(kp);
   }
 
   void setKi(T ki)
-    requires CoeffMutable<IT>
+    requires CoeffMutable<IntegralT>
   {
-    i.set(ki);
+    integral.set(ki);
   }
 
   void setKd(T kd)
-    requires CoeffMutable<DT>
+    requires CoeffMutable<DerivativeT>
   {
-    d.set(kd);
+    derivative.set(kd);
   }
 
 private:
-  PT      p;
-  IT      i;
-  DT      d;
-  const T min;
-  const T max;
+  ProportionalT proportional;
+  IntegralT     integral;
+  DerivativeT   derivative;
+  const T       min;
+  const T       max;
 };
 } // namespace mamePID
