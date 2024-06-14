@@ -7,6 +7,9 @@
 #include "testcases/simple_d.hpp"
 #include "testcases/simple_i.hpp"
 #include "testcases/simple_p.hpp"
+#include "testcases/simple_pi.hpp"
+#include "testcases/simple_pd.hpp"
+#include "testcases/simple_pid.hpp"
 #include "utest.h"
 
 #define ASSERT_ARRNEAR_MSG(xs, ys, abs_error)                                                                \
@@ -17,17 +20,27 @@
     }                                                                                                        \
   } while (0)
 
-#define STEP_RESPONSE_TEST(testcase, T, min_v, max_v) STEP_RESPONSE_TEST_(testcase, T, min_v, max_v, T)
+#define PID_STEP_RESPONSE_TEST(testcase, T, min_v, max_v)                                                    \
+  STEP_RESPONSE_TEST_(run_pid_test, testcase, T, min_v, max_v, T)
+#define PI_STEP_RESPONSE_TEST(testcase, T, min_v, max_v)                                                     \
+  STEP_RESPONSE_TEST_(run_pi_test, testcase, T, min_v, max_v, T)
+#define PD_STEP_RESPONSE_TEST(testcase, T, min_v, max_v)                                                     \
+  STEP_RESPONSE_TEST_(run_pd_test, testcase, T, min_v, max_v, T)
 
-#define STEP_RESPONSE_TEST_WITH_SUBNAME(testcase, T, min_v, max_v, SUBNAME)                                  \
-  STEP_RESPONSE_TEST_(testcase, T, min_v, max_v, T##_##SUBNAME)
+#define PID_STEP_RESPONSE_TEST_WITH_SUBNAME(testcase, T, min_v, max_v, SUBNAME)                              \
+  STEP_RESPONSE_TEST_(run_pid_test, testcase, T, min_v, max_v, T##_##SUBNAME)
 
-#define STEP_RESPONSE_TEST_(testcase, T, min_v, max_v, NAME)                                                 \
+#define PI_STEP_RESPONSE_TEST_WITH_SUBNAME(testcase, T, min_v, max_v, SUBNAME)                               \
+  STEP_RESPONSE_TEST_(run_pi_test, testcase, T, min_v, max_v, T##_##SUBNAME)
+#define PD_STEP_RESPONSE_TEST_WITH_SUBNAME(testcase, T, min_v, max_v, SUBNAME)                               \
+  STEP_RESPONSE_TEST_(run_pd_test, testcase, T, min_v, max_v, T##_##SUBNAME)
+
+#define STEP_RESPONSE_TEST_(test_func, testcase, T, min_v, max_v, NAME)                                      \
   UTEST(testcase, NAME)                                                                                      \
   {                                                                                                          \
     using testcase = testcases::testcase;                                                                    \
                                                                                                              \
-    const auto output = run_test<T, testcase>((min_v), (max_v));                                             \
+    const auto output = test_func<T, testcase>((min_v), (max_v));                                            \
     ASSERT_ARRNEAR_MSG(testcase::output, output, 1e-3);                                                      \
   }
 
@@ -55,7 +68,7 @@ get_with_default(const Range& arr, size_t i, std::ranges::range_value_t<Range> d
 
 template<typename T, TestCase<T> TC>
 auto
-run_test(T min_value, T max_value)
+run_pid_test(T min_value, T max_value)
 {
   auto pid = mamePID::pid(TC::kp, TC::ki, TC::kd, TC::sp, min_value, max_value);
 
@@ -72,8 +85,49 @@ run_test(T min_value, T max_value)
   return output;
 }
 
-STEP_RESPONSE_TEST(simple_p, double, -100, 100)
-STEP_RESPONSE_TEST(simple_i, double, -100, 100)
-STEP_RESPONSE_TEST(simple_d, double, -100, 100)
+template<typename T, TestCase<T> TC>
+auto
+run_pi_test(T min_value, T max_value)
+{
+  auto pi = mamePID::pi(TC::kp, TC::ki, TC::sp, min_value, max_value);
+
+  T                   acc{ 0 };
+  std::function<T(T)> identity        = [](T v) -> T { return v; };
+  std::function<T(T)> first_order_lag = [&acc](T v) -> T { return acc += v; };
+  std::function<T(T)> obj             = TC::order_of_lag == 0 ? identity : first_order_lag;
+
+  std::array<T, TC::output.size()> output;
+  for (auto i : std::views::iota(0, static_cast<int>(TC::output.size()))) {
+    output[i] = obj(pi.calculate(TC::g, get_with_default(output, i - 1, 0.0)));
+  }
+
+  return output;
+}
+
+template<typename T, TestCase<T> TC>
+auto
+run_pd_test(T min_value, T max_value)
+{
+  auto pd = mamePID::pd(TC::kp, TC::kd, TC::sp, min_value, max_value);
+
+  T                   acc{ 0 };
+  std::function<T(T)> identity        = [](T v) -> T { return v; };
+  std::function<T(T)> first_order_lag = [&acc](T v) -> T { auto ret = acc; acc += v; return ret; };
+  std::function<T(T)> obj             = TC::order_of_lag == 0 ? identity : first_order_lag;
+
+  std::array<T, TC::output.size()> output;
+  for (auto i : std::views::iota(0, static_cast<int>(TC::output.size()))) {
+    output[i] = obj(pd.calculate(TC::g, get_with_default(output, i - 1, 0.0)));
+  }
+
+  return output;
+}
+
+PID_STEP_RESPONSE_TEST(simple_p, double, -100, 100)
+PID_STEP_RESPONSE_TEST(simple_i, double, -100, 100)
+PID_STEP_RESPONSE_TEST(simple_d, double, -100, 100)
+PI_STEP_RESPONSE_TEST(simple_pi, double, -100, 100)
+PD_STEP_RESPONSE_TEST(simple_pd, double, -100, 100)
+PID_STEP_RESPONSE_TEST(simple_pid, double, -100, 100)
 
 UTEST_MAIN()

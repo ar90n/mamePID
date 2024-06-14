@@ -25,10 +25,25 @@ $(TEST_VECTOR_DIR)/simple_i.hpp: $(GEN_TESTCASES_DIR)/src/gen_testcases.jl
 # Generate simple_d.hpp in the test vectors directory
 $(TEST_VECTOR_DIR)/simple_d.hpp: $(GEN_TESTCASES_DIR)/src/gen_testcases.jl
 	@echo "Generating simple_d.hpp"
-	$(JULIA) --project=$(GEN_TESTCASES_DIR) $(GEN_TESTCASES_DIR)/src/gen_testcases.jl --name simple_d --arch PID --kp 0.0 --ki 0.0 --kd 1.0 --g 0.1 --sp 1.0 --ol 1 --n 64 > $(TEST_VECTOR_DIR)/simple_d.hpp
+	$(JULIA) --project=$(GEN_TESTCASES_DIR) $(GEN_TESTCASES_DIR)/src/gen_testcases.jl --name simple_d --arch PID --kp 0.0 --ki 0.0 --kd 0.1 --g 1.0 --sp 1.0 --ol 1 --n 64 > $(TEST_VECTOR_DIR)/simple_d.hpp
+
+# Generate simple_pi.hpp in the test vectors directory
+$(TEST_VECTOR_DIR)/simple_pi.hpp: $(GEN_TESTCASES_DIR)/src/gen_testcases.jl
+	@echo "Generating simple_pi.hpp"
+	$(JULIA) --project=$(GEN_TESTCASES_DIR) $(GEN_TESTCASES_DIR)/src/gen_testcases.jl --name simple_pi --arch PID --kp 0.1 --ki 0.1 --kd 0.0 --g 1.0 --sp 1.0 --ol 0 --n 64 > $(TEST_VECTOR_DIR)/simple_pi.hpp
+
+# Generate simple_pd.hpp in the test vectors directory
+$(TEST_VECTOR_DIR)/simple_pd.hpp: $(GEN_TESTCASES_DIR)/src/gen_testcases.jl
+	@echo "Generating simple_pd.hpp"
+	$(JULIA) --project=$(GEN_TESTCASES_DIR) $(GEN_TESTCASES_DIR)/src/gen_testcases.jl --name simple_pd --arch PID --kp 0.1 --ki 0.0 --kd 0.1 --g 1.0 --sp 1.0 --ol 1 --n 64 > $(TEST_VECTOR_DIR)/simple_pd.hpp
+
+# Generate simple_pid.hpp in the test vectors directory
+$(TEST_VECTOR_DIR)/simple_pid.hpp: $(GEN_TESTCASES_DIR)/src/gen_testcases.jl
+	@echo "Generating simple_pid.hpp"
+	$(JULIA) --project=$(GEN_TESTCASES_DIR) $(GEN_TESTCASES_DIR)/src/gen_testcases.jl --name simple_pid --arch PID --kp 0.1 --ki 0.1 --kd 0.1 --g 1.0 --sp 1.0 --ol 1 --n 64 > $(TEST_VECTOR_DIR)/simple_pid.hpp
 
 # Generate all test vectors
-gen: $(TEST_VECTOR_DIR)/simple_p.hpp $(TEST_VECTOR_DIR)/simple_i.hpp $(TEST_VECTOR_DIR)/simple_d.hpp
+gen: $(TEST_VECTOR_DIR)/simple_p.hpp $(TEST_VECTOR_DIR)/simple_i.hpp $(TEST_VECTOR_DIR)/simple_d.hpp $(TEST_VECTOR_DIR)/simple_pi.hpp $(TEST_VECTOR_DIR)/simple_pd.hpp $(TEST_VECTOR_DIR)/simple_pid.hpp
 	@echo "All test vectors generated"
 
 # Build the test program
@@ -48,3 +63,6 @@ clean:
 	rm -f $(TEST_VECTOR_DIR)/simple_p.hpp
 	rm -f $(TEST_VECTOR_DIR)/simple_i.hpp
 	rm -f $(TEST_VECTOR_DIR)/simple_d.hpp
+	rm -f $(TEST_VECTOR_DIR)/simple_pi.hpp
+	rm -f $(TEST_VECTOR_DIR)/simple_pd.hpp
+	rm -f $(TEST_VECTOR_DIR)/simple_pid.hpp
