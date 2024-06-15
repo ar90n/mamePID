@@ -67,6 +67,8 @@ public:
     return integral;
   }
 
+  void reset(T setpoint, T pv, T out) { integral = out; }
+
 private:
   const T ki;
   const T minv;
@@ -94,6 +96,8 @@ public:
     pre_error          = error;
     return ret;
   }
+
+  void reset(T setpoint, T pv, T out) { pre_error = setpoint - pv; }
 
 private:
   const T kd;
@@ -135,6 +139,8 @@ public:
     pre_pv             = pv;
     return ret;
   }
+
+  void reset(T setpoint, T pv, T out) { pre_pv = pv; }
 
 private:
   const T kd;
@@ -179,6 +185,19 @@ public:
     requires CoeffMutable<DerivativeT>
   {
     derivative.set(kd);
+  }
+
+  void reset(T setpoint, T pv, T out)
+  {
+    if constexpr (std::invocable<ProportionalT, T>) {
+      proportional.reset(setpoint, pv, out);
+    }
+    if constexpr (std::invocable<IntegralT, T>) {
+      integral.reset(setpoint, pv, out);
+    }
+    if constexpr (std::invocable<DerivativeT, T>) {
+      derivative.reset(setpoint, pv, out);
+    }
   }
 
 private:
