@@ -60,8 +60,8 @@ public:
   T calculate(T setpoint, T pv)
   {
     const T error  = setpoint - pv;
-    const T ret    = integral;
     integral      += ki * error;
+    const T ret    = integral;
     return ret;
   }
 
@@ -187,7 +187,7 @@ private:
 
 template<typename T>
 auto
-pi(T kp, T ki, T sp, T min = std::numeric_limits<T>::min, T max = std::numeric_limits<T>::max)
+pi(T kp, T ki, T sp, T min = std::numeric_limits<T>::lowest(), T max = std::numeric_limits<T>::max())
 {
   return PID<T, Proportional<T>, Integral<T>, Zero<T>>(
     Proportional<T>(kp, sp), Integral<T>(ki, sp), Zero<T>(), min, max
@@ -196,7 +196,7 @@ pi(T kp, T ki, T sp, T min = std::numeric_limits<T>::min, T max = std::numeric_l
 
 template<typename T>
 auto
-pd(T kp, T kd, T sp, T min = std::numeric_limits<T>::min, T max = std::numeric_limits<T>::max)
+pd(T kp, T kd, T sp, T min = std::numeric_limits<T>::lowest(), T max = std::numeric_limits<T>::max())
 {
   return PID<T, Proportional<T>, Zero<T>, Derivative<T>>(
     Proportional<T>(kp, sp), Zero<T>(), Derivative<T>(kd, sp), min, max
@@ -205,7 +205,7 @@ pd(T kp, T kd, T sp, T min = std::numeric_limits<T>::min, T max = std::numeric_l
 
 template<typename T>
 auto
-pid(T kp, T ki, T kd, T sp, T min = std::numeric_limits<T>::min, T max = std::numeric_limits<T>::max)
+pid(T kp, T ki, T kd, T sp, T min = std::numeric_limits<T>::lowest(), T max = std::numeric_limits<T>::max())
 {
   return PID<T, Proportional<T>, Integral<T>, Derivative<T>>(
     Proportional<T>(kp, sp), Integral<T>(ki, sp), Derivative<T>(kd, sp), min, max
@@ -214,7 +214,7 @@ pid(T kp, T ki, T kd, T sp, T min = std::numeric_limits<T>::min, T max = std::nu
 
 template<typename T>
 auto
-pi_d(T kp, T ki, T kd, T sp, T min = std::numeric_limits<T>::min, T max = std::numeric_limits<T>::max)
+pi_d(T kp, T ki, T kd, T sp, T min = std::numeric_limits<T>::lowest(), T max = std::numeric_limits<T>::max())
 {
   return PID<T, Proportional<T>, Integral<T>, PrecedingDerivative<T>>(
     Proportional<T>(kp, sp), Integral<T>(ki, sp), PrecedingDerivative<T>(kd, sp), min, max
@@ -223,10 +223,10 @@ pi_d(T kp, T ki, T kd, T sp, T min = std::numeric_limits<T>::min, T max = std::n
 
 template<typename T>
 auto
-i_pd(T kp, T ki, T kd, T sp, T min = std::numeric_limits<T>::min, T max = std::numeric_limits<T>::max)
+i_pd(T kp, T ki, T kd, T sp, T min = std::numeric_limits<T>::lowest(), T max = std::numeric_limits<T>::max())
 {
-  return PID<T, Proportional<T>, Integral<T>, PrecedingDerivative<T>>(
-    PrecedingDerivative<T>(kp, sp), Integral<T>(ki, sp), PrecedingDerivative<T>(kd, sp), min, max
+  return PID<T, PrecedingProportional<T>, Integral<T>, PrecedingDerivative<T>>(
+    PrecedingProportional<T>(kp, sp), Integral<T>(ki, sp), PrecedingDerivative<T>(kd, sp), min, max
   );
 }
 
