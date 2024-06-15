@@ -51,8 +51,10 @@ class Integral
 {
 public:
   using value_type = T;
-  Integral(T ki, T dt)
+  Integral(T ki, T dt, T minv = std::numeric_limits<T>::lowest(), T maxv = std::numeric_limits<T>::max())
     : ki(ki * dt)
+    , minv(minv)
+    , maxv(maxv)
     , integral(0)
   {
   }
@@ -61,12 +63,14 @@ public:
   {
     const T error  = setpoint - pv;
     integral      += ki * error;
-    const T ret    = integral;
-    return ret;
+    integral       = std::clamp(integral, minv, maxv);
+    return integral;
   }
 
 private:
   const T ki;
+  const T minv;
+  const T maxv;
   T       integral;
 };
 
@@ -190,7 +194,7 @@ auto
 pi(T kp, T ki, T sp, T min = std::numeric_limits<T>::lowest(), T max = std::numeric_limits<T>::max())
 {
   return PID<T, Proportional<T>, Integral<T>, Zero<T>>(
-    Proportional<T>(kp, sp), Integral<T>(ki, sp), Zero<T>(), min, max
+    Proportional<T>(kp, sp), Integral<T>(ki, sp, min, max), Zero<T>(), min, max
   );
 }
 
@@ -208,7 +212,7 @@ auto
 pid(T kp, T ki, T kd, T sp, T min = std::numeric_limits<T>::lowest(), T max = std::numeric_limits<T>::max())
 {
   return PID<T, Proportional<T>, Integral<T>, Derivative<T>>(
-    Proportional<T>(kp, sp), Integral<T>(ki, sp), Derivative<T>(kd, sp), min, max
+    Proportional<T>(kp, sp), Integral<T>(ki, sp, min, max), Derivative<T>(kd, sp), min, max
   );
 }
 
@@ -217,7 +221,7 @@ auto
 pi_d(T kp, T ki, T kd, T sp, T min = std::numeric_limits<T>::lowest(), T max = std::numeric_limits<T>::max())
 {
   return PID<T, Proportional<T>, Integral<T>, PrecedingDerivative<T>>(
-    Proportional<T>(kp, sp), Integral<T>(ki, sp), PrecedingDerivative<T>(kd, sp), min, max
+    Proportional<T>(kp, sp), Integral<T>(ki, sp, min, max), PrecedingDerivative<T>(kd, sp), min, max
   );
 }
 
@@ -226,7 +230,7 @@ auto
 i_pd(T kp, T ki, T kd, T sp, T min = std::numeric_limits<T>::lowest(), T max = std::numeric_limits<T>::max())
 {
   return PID<T, PrecedingProportional<T>, Integral<T>, PrecedingDerivative<T>>(
-    PrecedingProportional<T>(kp, sp), Integral<T>(ki, sp), PrecedingDerivative<T>(kd, sp), min, max
+    PrecedingProportional<T>(kp, sp), Integral<T>(ki, sp, min, max), PrecedingDerivative<T>(kd, sp), min, max
   );
 }
 
