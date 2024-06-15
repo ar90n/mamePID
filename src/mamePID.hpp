@@ -90,9 +90,8 @@ public:
   {
     const T error      = setpoint - pv;
     const T derivative = error - pre_error;
-    const T ret        = kd * derivative;
     pre_error          = error;
-    return ret;
+    return kd * derivative;
   }
 
 private:
@@ -131,9 +130,8 @@ public:
   T calculate(T, T pv)
   {
     const T derivative = pv - pre_pv;
-    const T ret        = -kd * derivative;
     pre_pv             = pv;
-    return ret;
+    return -kd * derivative;
   }
 
 private:
