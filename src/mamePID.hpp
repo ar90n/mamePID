@@ -1,3 +1,6 @@
+#ifndef MAMEPID_HPP_
+#define MAMEPID_HPP_
+
 #include <limits>
 
 namespace mamePID {
@@ -233,3 +236,5 @@ i_pd(T kp, T ki, T kd, T sp, T min = std::numeric_limits<T>::lowest(), T max = s
 }
 
 } // namespace mamePID
+
+#endif // MAMEPID_HPP_
