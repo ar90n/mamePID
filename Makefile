@@ -77,7 +77,7 @@ $(TEST_VECTOR_DIR)/general_i_pd.hpp: init $(GEN_TESTCASES_DIR)/gen_testcases/mai
 	$(POETRY) --directory $(GEN_TESTCASES_DIR) run gen_testcases  general_i_pd --arch I_PD --kp 0.8 --ki 2.3 --kd 0.05 --g 1.2 --sp 0.1 --n 32 > $(TEST_VECTOR_DIR)/general_i_pd.hpp
 
 # Generate all test vectors
-gen: $(TEST_VECTOR_DIR)/simple_p.hpp $(TEST_VECTOR_DIR)/simple_i.hpp $(TEST_VECTOR_DIR)/simple_d.hpp $(TEST_VECTOR_DIR)/simple_pi.hpp $(TEST_VECTOR_DIR)/simple_pd.hpp $(TEST_VECTOR_DIR)/simple_pid.hpp $(TEST_VECTOR_DIR)/occilate_p.hpp $(TEST_VECTOR_DIR)/general_pid.hpp $(TEST_VECTOR_DIR)/general_pi_d.hpp $(TEST_VECTOR_DIR)/general_i_pd.hpp 
+gen: $(TEST_VECTOR_DIR)/simple_p.hpp $(TEST_VECTOR_DIR)/simple_i.hpp $(TEST_VECTOR_DIR)/simple_d.hpp $(TEST_VECTOR_DIR)/simple_pi.hpp $(TEST_VECTOR_DIR)/simple_pd.hpp $(TEST_VECTOR_DIR)/simple_pid.hpp $(TEST_VECTOR_DIR)/simple_pi_d.hpp $(TEST_VECTOR_DIR)/simple_i_pd.hpp $(TEST_VECTOR_DIR)/occilate_p.hpp $(TEST_VECTOR_DIR)/general_pid.hpp $(TEST_VECTOR_DIR)/general_pi_d.hpp $(TEST_VECTOR_DIR)/general_i_pd.hpp 
 	@echo "All test vectors generated"
 
 # Build the test program
